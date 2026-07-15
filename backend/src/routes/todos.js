@@ -45,8 +45,22 @@ router.put("/:id", async (req, res, next) => {
       return res.status(404).json({ error: "Tâche introuvable" });
     }
 
-    const next_title =
-      title !== undefined ? title.trim() : existing.rows[0].title;
+    // ✅ Add type & content validation
+    if (title !== undefined) {
+      if (typeof title !== "string") {
+        return res.status(400).json({ error: 'Le champ "title" doit être une chaîne' });
+      }
+      if (!title.trim()) {
+        return res.status(400).json({ error: 'Le champ "title" ne peut pas être vide' });
+      }
+    }
+
+    // ✅ Validate done is a boolean if provided
+    if (done !== undefined && typeof done !== "boolean") {
+      return res.status(400).json({ error: 'Le champ "done" doit être un booléen' });
+    }
+
+    const next_title = title !== undefined ? title.trim() : existing.rows[0].title;
     const next_done = done !== undefined ? done : existing.rows[0].done;
 
     const result = await pool.query(
